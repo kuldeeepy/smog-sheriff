@@ -1,0 +1,263 @@
+# ---------------------------------------------------------------------------
+# Smog Sheriff settings
+#
+# Everything about *where* we are and *what is polluting* lives here, so the
+# code never needs to change when you move to a different part of Delhi.
+#
+# Scene coordinates are in metres and match the Cyberwave environment:
+#   +x = east, +y = north, (0, 0) = centre of the scene.
+# ---------------------------------------------------------------------------
+
+[location]
+name = "Anand Vihar, Delhi"
+latitude = 28.6469
+longitude = 77.3152
+
+# Use today's real wind for this location (from Open-Meteo, free).
+# If the lookup fails, [weather] below is used instead.
+use_live_wind = true
+
+# Open-Meteo's PM numbers come from a coarse regional model that reads far
+# lower than Delhi's ground monitors (e.g. 58 vs ~250 µg/m³), so by default we
+# use the realistic [background] values below instead.
+use_live_background = false
+
+
+[cyberwave]
+# The robot twin (Unitree Go2) that carries our (stand-in) PM sensor.
+# Paste the twin's slug from the Cyberwave dashboard here.
+rover_twin = "kuldeeps-workspace/twins/smog-sheriff-dog"
+
+# The Cyberwave environment the robot lives in.
+environment = "8b18d774-73ff-405b-b068-514748d23d93"   # Smog Sheriff – Anand Vihar
+
+# How often the robot takes a step and a reading, in seconds.
+seconds_between_readings = 0.0   # the Cyberwave update itself takes ~1 s
+
+
+[robot]
+start = [0.0, -16.0]       # where the robot begins, in scene metres (on the south road)
+step_m = 1.5               # metres per step; each Cyberwave update takes ~1 s, so ~1.2 m/s
+
+# Patrol route along the roads (scene metres). It zig-zags through the colony
+# so a smoke plume from any direction crosses the robot's path.
+waypoints = [
+  [22.0, -16.0],                   # south road, heading east
+  [22.0, 0.0],    [-22.0, 0.0],    # up the east lane, then the main road westwards
+  [-22.0, 16.0],  [22.0, 16.0],    # north road, west -> east
+  [0.0, 16.0],    [0.0, -16.0],    # centre road, north -> south
+  [-22.0, -16.0],                  # back along the south road
+]
+
+
+[investigation]
+# Start investigating when PM2.5 is this many µg/m³ above the background.
+trigger_above_background = 80
+# Give up an investigation after this many steps.
+max_steps = 80
+
+
+# ---------------------------------------------------------------------------
+# THE MAP. build_scene.py turns everything below into the Cyberwave 3D scene,
+# and the robot's brain reads the same numbers, so they always match.
+#
+# x, y = centre of the thing; w = east-west size, d = north-south size,
+# h = height (metres). Colours are picked by `kind` (see build_scene.py).
+# ---------------------------------------------------------------------------
+
+[map]
+width = 64.0     # ground size, east-west (metres)
+depth = 48.0     # ground size, north-south
+
+# Roads (dark strips). The robot patrols along these.
+[[roads]]
+name = "Main road"
+x = 0.0
+y = 0.0
+w = 52.0
+d = 4.0
+
+[[roads]]
+name = "North lane"
+x = 0.0
+y = 16.0
+w = 52.0
+d = 3.0
+
+[[roads]]
+name = "South lane"
+x = 0.0
+y = -16.0
+w = 52.0
+d = 3.0
+
+[[roads]]
+name = "Centre road"
+x = 0.0
+y = 0.0
+w = 3.0
+d = 35.0
+
+[[roads]]
+name = "West lane"
+x = -22.0
+y = 0.0
+w = 3.0
+d = 35.0
+
+[[roads]]
+name = "East lane"
+x = 22.0
+y = 0.0
+w = 3.0
+d = 35.0
+
+# kind: market | homes | school | site | park | shops | block
+# North-west block: the market, with the garbage dump behind it.
+[[buildings]]
+name = "Sabzi Market"
+kind = "market"
+x = -11.0
+y = 10.0
+w = 12.0
+d = 6.0
+h = 4.0
+
+[[buildings]]
+name = "Shops row"
+kind = "shops"
+x = -11.0
+y = 20.5
+w = 16.0
+d = 4.0
+h = 5.0
+
+# North-east block: the school (alerts near it are critical) and its playground.
+[[buildings]]
+name = "Government School"
+kind = "school"
+x = 11.0
+y = 10.0
+w = 12.0
+d = 7.0
+h = 7.0
+
+[[buildings]]
+name = "School playground"
+kind = "park"
+x = 11.0
+y = 4.0
+w = 10.0
+d = 3.5
+h = 0.05
+
+# South-west block: rows of homes.
+[[buildings]]
+name = "Homes A"
+kind = "homes"
+x = -15.5
+y = -6.0
+w = 6.0
+d = 7.0
+h = 9.0
+
+[[buildings]]
+name = "Homes B"
+kind = "homes"
+x = -6.5
+y = -6.0
+w = 6.0
+d = 7.0
+h = 12.0
+
+[[buildings]]
+name = "Homes C"
+kind = "homes"
+x = -11.0
+y = -11.5
+w = 15.0
+d = 3.0
+h = 6.0
+
+# South-east block: the building site.
+[[buildings]]
+name = "Building site"
+kind = "site"
+x = 11.0
+y = -8.0
+w = 14.0
+d = 10.0
+h = 1.5
+
+# Outer edge of the colony: a park and neighbouring blocks.
+[[buildings]]
+name = "District park"
+kind = "park"
+x = 27.5
+y = 8.0
+w = 6.0
+d = 14.0
+h = 0.05
+
+[[buildings]]
+name = "Bus depot"
+kind = "block"
+x = 27.5
+y = -9.0
+w = 6.0
+d = 12.0
+h = 5.0
+
+[[buildings]]
+name = "Apartments"
+kind = "homes"
+x = -27.5
+y = 0.0
+w = 6.0
+d = 24.0
+h = 15.0
+
+[[buildings]]
+name = "Shops south"
+kind = "shops"
+x = 11.0
+y = -20.5
+w = 18.0
+d = 4.0
+h = 4.0
+
+
+# Fallback wind, used when live conditions are off or unavailable.
+[weather]
+wind_from_degrees = 315      # direction the wind comes FROM (0 = north, 90 = east)
+wind_speed_m_per_s = 2.0
+
+
+# Fallback "normal" city-wide pollution, in µg/m³ (typical Delhi winter night).
+[background]
+pm25 = 300
+pm10 = 450
+
+
+# ---------------------------------------------------------------------------
+# Hidden pollution sources (the part we simulate).
+#
+# type     : "garbage_burning" or "construction_dust" — each has its own
+#            PM2.5 / PM10 fingerprint (see air_model.py).
+# x, y     : where the source is in the scene, in metres.
+# strength : how much extra PM2.5 it adds right next to it, in µg/m³.
+# ---------------------------------------------------------------------------
+
+[[sources]]
+name = "Garbage fire behind the market"
+type = "garbage_burning"
+x = -11.0
+y = 5.0
+strength = 2000
+
+[[sources]]
+name = "Uncovered sand at the building site"
+type = "construction_dust"
+x = 8.0
+y = -6.0
+strength = 700

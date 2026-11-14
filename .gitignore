@@ -1,0 +1,6 @@
+__pycache__/
+.venv/
+.env
+photos/
+scene_backup_*.json
+*.mov
