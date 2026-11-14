@@ -184,7 +184,13 @@ class CyberwaveBody:
             yaw = 90.0 - heading_deg  # scene yaw is counter-clockwise from east (+x)
             qx, qy, qz, qw = self.robot._euler_to_quaternion(0, 0, yaw)
             state.update(rotation_x=qx, rotation_y=qy, rotation_z=qz, rotation_w=qw)
-        self.client.twins.update_state(self.robot.uuid, state)
+        try:
+            self.client.twins.update_state(self.robot.uuid, state)
+        except Exception as error:
+            # Cyberwave hiccup (e.g. a temporary 502): skip this step, keep patrolling.
+            print(f"   (move skipped, Cyberwave error: {type(error).__name__}); retrying next step")
+            time.sleep(2)
+            return
         self.x, self.y = x, y
 
     def photo(self) -> bytes | None:
